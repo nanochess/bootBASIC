@@ -1,0 +1,165 @@
+ _                 _  ______  ___   _____ _____ _____ 
+| |               | | | ___ \/ _ \ /  ___|_   _/  __ \
+| |__   ___   ___ | |_| |_/ / /_\ \\ `--.  | | | /  \/
+| '_ \ / _ \ / _ \| __| ___ \  _  | `--. \ | | | |    
+| |_) | (_) | (_) | |_| |_/ / | | |/\__/ /_| |_| \__/\
+|_.__/ \___/ \___/ \__\____/\_| |_/\____/ \___/ \____/
+
+bootBASIC interpreter in 512 bytes (boot sector or COM file)
+by Oscar Toledo G. Jul/22/2019
+
+http://nanochess.org
+https://github.com/nanochess
+
+This is an integer BASIC language interpreter.
+
+It's compatible with the 8088 processor (the original IBM PC). 
+
+If you want to assemble it, you must download the Netwide Assembler
+(nasm) from www.nasm.us
+
+Use this command line:
+
+  nasm -f bin basic.asm -Dcom_file=1 -o basic.com
+  nasm -f bin basic.asm -Dcom_file=0 -o basic.img
+
+Tested with VirtualBox for Mac OS X running Windows XP running this
+interpreter, it also works with DosBox and probably with qemu:
+
+  qemu-system-x86_64 -fda basic.img
+
+Enjoy it!
+
+
+ _   _             _      __  __                    _ 
+| | | |___ ___ _ _( )___ |  \/  |__ _ _ _ _  _ __ _| |
+| |_| (_-</ -_) '_|/(_-< | |\/| / _` | ' \ || / _` | |
+ \___//__/\___|_|   /__/ |_|  |_\__,_|_||_\_,_\__,_|_|
+
+        
+Line entry is done with keyboard, finish the line with Enter.
+Only 19 characters per line as maximum.
+        
+Backspace can be used, don't be fooled by the fact
+that screen isn't deleted (it's all right in the buffer).
+        
+All statements must be in lowercase.
+
+Line numbers can be 1 to 999.
+
+26 variables are available (a-z)
+
+Numbers (0-65535) can be entered and display as unsigned.
+        
+To enter new program lines:
+  10 print "Hello, world!"
+        
+To erase program lines:
+  10
+        
+To test statements directly (interactive syntax):
+  print "Hello, world!"
+        
+To erase the current program:
+  new
+        
+To run the current program:
+  run
+        
+To list the current program:
+  list
+        
+To exit to command-line:
+  system
+        
+Statements:
+  var=expr        Assign expr value to var (a-z)
+        
+  print expr      Print expression value, new line
+  print expr;     Print expression value, continue
+  print "hello"   Print string, new line
+  print "hello";  Print string, continue
+        
+  input var       Input value into variable (a-z)
+        
+  goto expr       Goto to indicated line in program
+        
+  if expr1 goto expr2
+              If expr1 is non-zero then go to line,
+              else go to following line.
+        
+Examples of if:
+        
+  if c-5 goto 20  If c isn't 5, go to line 20
+        
+Expressions:
+        
+  The operators +, -, / and * are available with
+  common precedence rules and signed operation.
+        
+  You can also use parentheses:
+        
+     5+6*(10/2)
+        
+  Variables and numbers can be used in expressions.
+        
+Sample program (counting 1 to 10):
+        
+10 a=1
+20 print a
+30 a=a+1
+40 if a-11 goto 20
+        
+Sample program (Pascal's triangle, each number is the sum
+of the two over it):
+        
+10 input n
+20 i=1
+30 c=1
+40 j=0
+50 t=n-i
+60 if j-t goto 80
+70 goto 110
+80 print " ";
+90 j=j+1
+100 goto 50
+110 k=1
+120 if k-i-1 goto 140
+130 goto 190
+140 print c;
+150 c=c*(i-k)/k
+160 print " ";
+170 k=k+1
+180 goto 120
+190 print
+200 i=i+1
+210 if i-n-1 goto 30
+
+
+>> ATTENTION <<        
+
+Do you would like more details on the inner workings? This program
+is fully commented in my new book Programming Boot Sector Games
+and you'll also find a 8086/8088 crash course!
+
+Now available from Lulu:
+
+  Soft-cover
+    http://www.lulu.com/shop/oscar-toledo-gutierrez/programming-boot-sector-games/paperback/product-24188564.html
+
+  Hard-cover
+    http://www.lulu.com/shop/oscar-toledo-gutierrez/programming-boot-sector-games/hardcover/product-24188530.html
+
+These are some of the example programs documented profusely
+in the book:
+
+  * Guess the number.
+  * Tic-Tac-Toe game.
+  * Text graphics.
+  * Mandelbrot set.
+  * F-Bird game.
+  * Invaders game.
+  * Pillman game.
+  * Toledo Atomchess.
+  * bootBASIC language.
+
