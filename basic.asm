@@ -324,8 +324,8 @@ expr2:
         jne f24
         call expr           ; Process inner expr.
         cmp byte [si],')'   ; Closing parenthesis?
-        jne error           ; No, jump to error
-        jmp spaces_2        ; Yes, avoid spaces
+        je spaces_2         ; Yes, avoid spaces
+        jmp error           ; No, jump to error
 
 f24:    cmp al,0x40         ; Variable?
         jnc f25             ; Yes, jump
