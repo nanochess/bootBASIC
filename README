@@ -96,6 +96,7 @@ Expressions:
         
   The operators +, -, / and * are available with
   common precedence rules and signed operation.
+  Integer-only arithmetic.
         
   You can also use parentheses:
         
