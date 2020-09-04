@@ -410,8 +410,7 @@ f8:     pop ax
         jmp short output    ; ...ASCII digit
 
         ;
-        ; Read number in input
-        ; Also avoid spaces afterwards.
+        ; Read number in input.
         ; AX = result
         ;
 input_number:
