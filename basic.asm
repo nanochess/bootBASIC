@@ -4,7 +4,7 @@
         ; by Oscar Toledo G.
         ; http://nanochess.org/
         ;
-        ; (c) Copyright 2019 Oscar Toledo G.
+        ; (c) Copyright 2019-2020 Oscar Toledo G.
         ;
         ; Creation date: Jul/19/2019. 10pm to 12am.
         ; Revision date: Jul/20/2019. 10am to 2pm.
@@ -33,13 +33,13 @@
         ; Numbers (0-65535) can be entered and display as unsigned.
         ;
         ; To enter new program lines:
-        ;   10 print "Hello, world!"
+        ;   10 print "Hello all!"
         ;
         ; To erase program lines:
         ;   10
         ;
         ; To test statements directly (interactive syntax):
-        ;   print "Hello, world!"
+        ;   print "Hello all!"
         ;
         ; To erase the current program:
         ;   new
@@ -77,12 +77,16 @@
         ;
         ;   The operators +, -, / and * are available with
         ;   common precedence rules and signed operation.
+        ;   Integer-only arithmetic.
         ;
         ;   You can also use parentheses:
         ;
         ;      5+6*(10/2)
         ;
         ;   Variables and numbers can be used in expressions.
+        ;
+        ;   The rnd function (without arguments) returns a
+        ;   value between 0 and 255.
         ;
         ; Sample program (counting 1 to 10):
         ;
@@ -116,6 +120,21 @@
         ; 200 i=i+1
         ; 210 if i-n-1 goto 30
         ;
+        ; Sample program of guessing the dice:
+        ;
+        ; 10 print "choose ";
+        ; 20 print "a number ";
+        ; 30 print "(1-6)"
+        ; 40 input a
+        ; 50 b=rnd
+        ; 60 b=b-b/6*6
+        ; 70 b=b+1
+        ; 80 if a-b goto 110
+        ; 90 print "good"
+        ; 100 goto 120
+        ; 110 print "miss"
+        ; 120 print b
+        ;
 
         cpu 8086
 
@@ -130,9 +149,11 @@ com_file:       equ 0
     %endif
 
 vars:       equ 0x7e00  ; Variables (multiple of 256)
-running:    equ 0x7e7e  ; Running status
 line:       equ 0x7e80  ; Line input
-program:    equ 0x7f00  ; Program address
+
+program:    equ 0x8000  ; Program address
+                        ; (notice optimizations dependent on this address)
+
 stack:      equ 0xff00  ; Stack address
 max_line:   equ 1000    ; First unavailable line number
 max_length: equ 20      ; Maximum length of line
@@ -150,9 +171,9 @@ start:
     %endif
         cld             ; Clear Direction flag
         mov di,program  ; Point to program
-        mov al,0x0d     ; Fill with CR
-        mov cx,max_size ; Max. program size
-        rep stosb       ; Initialize
+f14:    mov byte [di],0x0d ; Fill with Carriage Return (CR) character
+        inc di          ; Until reaching maximum 64K (DI becomes zero)
+        jne f14
 
         ;
         ; Main loop
@@ -161,8 +182,6 @@ main_loop:
         mov sp,stack    ; Reinitialize stack pointer
         mov ax,main_loop
         push ax
-        xor ax,ax       ; Mark as interactive
-        mov [running],ax
         mov al,'>'      ; Show prompt
         call input_line ; Accept line
         call input_number       ; Get number
@@ -188,7 +207,8 @@ statement:
         mov di,statements   ; Point to statements list
 f5:     mov al,[di]     ; Read length of the string
         inc di          ; Avoid length byte
-        and ax,0x00ff   ; Is it zero?
+        cbw             ; Make AH zero
+        dec ax          ; Is it zero?
         je f4           ; Yes, jump
         xchg ax,cx
         push si         ; Save current position
@@ -331,15 +351,25 @@ f24:    cmp al,0x40         ; Variable?
         jnc f25             ; Yes, jump
         dec si              ; Back one letter...
         call input_number   ; ...to read number
-        jmp spaces          ; Avoid spaces
-        
-f25:    call get_variable_2 ; Get variable address
+        jmp short spaces
+
+f25:    cmp al,0x72
+        jne f22
+        cmp byte [si],0x6e
+        jne f22
+        lodsw               ; Advance SI by 2
+        in al,0x40          ; Read timer counter 0
+        mov ah,0       
+        ret
+
+f22:    call get_variable_2 ; Get variable address
         xchg ax,bx
         mov ax,[bx]         ; Read
         ret                 ; Return
 
         ;
-        ; Get variable address
+        ; Get variable address.
+        ; Also avoid spaces.
         ;
 get_variable:
         lodsb               ; Read source
@@ -347,18 +377,20 @@ get_variable_2:
         and al,0x1f         ; 0x61-0x7a -> 0x01-0x1a
         add al,al           ; x 2 (each variable = word)
         mov ah,vars>>8      ; Setup high-byte of address
-        ;
-        ; Avoid spaces
-        ;
-spaces:
-        cmp byte [si],' '   ; Space found?
-        jne f22             ; No, return
+        dec si
         ;
         ; Avoid spaces after current character
         ;
 spaces_2:
-        inc si              ; Advance to next character
-        jmp spaces
+        inc si
+        ;
+        ; Avoid spaces
+        ; The interpreter depends on this routine not modifying AX
+        ;
+spaces:
+        cmp byte [si],' '   ; Space found?
+        je spaces_2         ; Yes, move one character ahead.
+        ret                 ; No, return.
 
         ;
         ; Output unsigned number 
@@ -375,10 +407,11 @@ f26:
         call f26            ; Yes, output left side
 f8:     pop ax
         add al,'0'          ; Output remainder as...
-        jmp output          ; ...ASCII digit
+        jmp short output    ; ...ASCII digit
 
         ;
         ; Read number in input
+        ; Also avoid spaces afterwards.
         ; AX = result
         ;
 input_number:
@@ -395,7 +428,6 @@ f11:    lodsb               ; Read source
         jmp f11             ; Continue
 
 f12:    dec si              ; SI points to first non-digit
-f22:
         ret
 
         ;
@@ -419,32 +451,20 @@ run_statement:
         xor ax,ax           
 f10:
         call find_line      ; Find line in program
-f27:    cmp word [running],0 ; Already running?
-        je f31
-        mov [running],ax    ; Yes, target is new line
+f27:    cmp sp,stack-2      ; In interactive mode?
+        je f31              ; Yes, jump.
+        mov [stack-4],ax    ; No, replace the saved address of next line
         ret
 f31:
         push ax
         pop si
         add ax,max_length   ; Point to next line
-        mov [running],ax    ; Save for next time
+        push ax             ; Save for next time (this goes into address stack-4)
         call statement      ; Process current statement
-        mov ax,[running]
+        pop ax              ; Restore address of next line (could have changed)
         cmp ax,program+max_size ; Reached the end?
         jne f31             ; No, continue
         ret                 ; Yes, return
-
-        ;
-        ; Find line in program
-        ; Entry:
-        ;   ax = line number
-        ; Result:
-        ;   ax = pointer to program
-find_line:
-        mov cx,max_length
-        mul cx
-        add ax,program
-        ret
 
         ;
         ; Input line from keyboard
@@ -484,6 +504,7 @@ f9:
         cmp al,'"'      ; Double quotes?
         je f18          ; Yes, jump
         call output     ; Output character
+        cmp al,0x0d     ; 
         jne f9          ; Jump if not finished with 0x0d (CR)
         ret             ; Return
 
@@ -520,7 +541,19 @@ f17:
         mov ah,0x0e
         mov bx,0x0007
         int 0x10
-        cmp al,0x0d
+        ret
+
+        ;
+        ; Find line in program
+        ; Entry:
+        ;   ax = line number
+        ; Result:
+        ;   ax = pointer to program.
+        ;   cx = max. length allowed for line.
+find_line:
+        mov cx,max_length
+        mul cx
+        add ax,program
         ret
 
         ;
@@ -530,31 +563,31 @@ f17:
         ; Then a word with the address of the code
         ;
 statements:
-        db 3,"new"
+        db 4,"new"
         dw start
 
-        db 4,"list"
+        db 5,"list"
         dw list_statement
 
-        db 3,"run"
+        db 4,"run"
         dw run_statement
 
-        db 5,"print"
+        db 6,"print"
         dw print_statement
 
-        db 5,"input"
+        db 6,"input"
         dw input_statement
 
-        db 2,"if"
+        db 3,"if"
         dw if_statement
 
-        db 4,"goto"
+        db 5,"goto"
         dw goto_statement
 
-        db 6,"system"
+        db 7,"system"
         dw system_statement
 
-        db 0
+        db 1
 
         ;
         ; Boot sector filler

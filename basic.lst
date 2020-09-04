@@ -4,7 +4,7 @@
      4                                          ; by Oscar Toledo G.
      5                                          ; http://nanochess.org/
      6                                          ;
-     7                                          ; (c) Copyright 2019 Oscar Toledo G.
+     7                                          ; (c) Copyright 2019-2020 Oscar Toledo G.
      8                                          ;
      9                                          ; Creation date: Jul/19/2019. 10pm to 12am.
     10                                          ; Revision date: Jul/20/2019. 10am to 2pm.
@@ -33,13 +33,13 @@
     33                                          ; Numbers (0-65535) can be entered and display as unsigned.
     34                                          ;
     35                                          ; To enter new program lines:
-    36                                          ;   10 print "Hello, world!"
+    36                                          ;   10 print "Hello all!"
     37                                          ;
     38                                          ; To erase program lines:
     39                                          ;   10
     40                                          ;
     41                                          ; To test statements directly (interactive syntax):
-    42                                          ;   print "Hello, world!"
+    42                                          ;   print "Hello all!"
     43                                          ;
     44                                          ; To erase the current program:
     45                                          ;   new
@@ -77,491 +77,524 @@
     77                                          ;
     78                                          ;   The operators +, -, / and * are available with
     79                                          ;   common precedence rules and signed operation.
-    80                                          ;
-    81                                          ;   You can also use parentheses:
-    82                                          ;
-    83                                          ;      5+6*(10/2)
-    84                                          ;
-    85                                          ;   Variables and numbers can be used in expressions.
-    86                                          ;
-    87                                          ; Sample program (counting 1 to 10):
-    88                                          ;
-    89                                          ; 10 a=1
-    90                                          ; 20 print a
-    91                                          ; 30 a=a+1
-    92                                          ; 40 if a-11 goto 20
-    93                                          ;
-    94                                          ; Sample program (Pascal's triangle, each number is the sum
-    95                                          ; of the two over it):
-    96                                          ;
-    97                                          ; 10 input n
-    98                                          ; 20 i=1
-    99                                          ; 30 c=1
-   100                                          ; 40 j=0
-   101                                          ; 50 t=n-i
-   102                                          ; 60 if j-t goto 80
-   103                                          ; 70 goto 110
-   104                                          ; 80 print " ";
-   105                                          ; 90 j=j+1
-   106                                          ; 100 goto 50
-   107                                          ; 110 k=1
-   108                                          ; 120 if k-i-1 goto 140
-   109                                          ; 130 goto 190
-   110                                          ; 140 print c;
-   111                                          ; 150 c=c*(i-k)/k
-   112                                          ; 160 print " ";
-   113                                          ; 170 k=k+1
-   114                                          ; 180 goto 120
-   115                                          ; 190 print
-   116                                          ; 200 i=i+1
-   117                                          ; 210 if i-n-1 goto 30
-   118                                          ;
-   119                                  
-   120                                          cpu 8086
-   121                                  
-   122                                      %ifndef com_file    ; If not defined create a boot sector
-   123                                  com_file:       equ 0
-   124                                      %endif
-   125                                  
-   126                                      %if com_file
-   127                                          org 0x0100
-   128                                      %else
-   129                                          org 0x7c00
-   130                                      %endif
-   131                                  
-   132                                  vars:       equ 0x7e00  ; Variables (multiple of 256)
-   133                                  running:    equ 0x7e7e  ; Running status
-   134                                  line:       equ 0x7e80  ; Line input
-   135                                  program:    equ 0x7f00  ; Program address
-   136                                  stack:      equ 0xff00  ; Stack address
-   137                                  max_line:   equ 1000    ; First unavailable line number
-   138                                  max_length: equ 20      ; Maximum length of line
-   139                                  max_size:   equ max_line*max_length ; Max. program size
+    80                                          ;   Integer-only arithmetic.
+    81                                          ;
+    82                                          ;   You can also use parentheses:
+    83                                          ;
+    84                                          ;      5+6*(10/2)
+    85                                          ;
+    86                                          ;   Variables and numbers can be used in expressions.
+    87                                          ;
+    88                                          ;   The rnd function (without arguments) returns a
+    89                                          ;   value between 0 and 255.
+    90                                          ;
+    91                                          ; Sample program (counting 1 to 10):
+    92                                          ;
+    93                                          ; 10 a=1
+    94                                          ; 20 print a
+    95                                          ; 30 a=a+1
+    96                                          ; 40 if a-11 goto 20
+    97                                          ;
+    98                                          ; Sample program (Pascal's triangle, each number is the sum
+    99                                          ; of the two over it):
+   100                                          ;
+   101                                          ; 10 input n
+   102                                          ; 20 i=1
+   103                                          ; 30 c=1
+   104                                          ; 40 j=0
+   105                                          ; 50 t=n-i
+   106                                          ; 60 if j-t goto 80
+   107                                          ; 70 goto 110
+   108                                          ; 80 print " ";
+   109                                          ; 90 j=j+1
+   110                                          ; 100 goto 50
+   111                                          ; 110 k=1
+   112                                          ; 120 if k-i-1 goto 140
+   113                                          ; 130 goto 190
+   114                                          ; 140 print c;
+   115                                          ; 150 c=c*(i-k)/k
+   116                                          ; 160 print " ";
+   117                                          ; 170 k=k+1
+   118                                          ; 180 goto 120
+   119                                          ; 190 print
+   120                                          ; 200 i=i+1
+   121                                          ; 210 if i-n-1 goto 30
+   122                                          ;
+   123                                          ; Sample program of guessing the dice:
+   124                                          ;
+   125                                          ; 10 print "choose ";
+   126                                          ; 20 print "a number ";
+   127                                          ; 30 print "(1-6)"
+   128                                          ; 40 input a
+   129                                          ; 50 b=rnd
+   130                                          ; 60 b=b-b/6*6
+   131                                          ; 70 b=b+1
+   132                                          ; 80 if a-b goto 110
+   133                                          ; 90 print "good"
+   134                                          ; 100 goto 120
+   135                                          ; 110 print "miss"
+   136                                          ; 120 print b
+   137                                          ;
+   138                                  
+   139                                          cpu 8086
    140                                  
-   141                                  start:
-   142                                      %if com_file
-   143                                      %else
-   144 00000000 0E                              push cs         ; For boot sector
-   145 00000001 0E                              push cs         ; it needs to setup
-   146 00000002 0E                              push cs         ; DS, ES and SS.
-   147 00000003 1F                              pop ds
-   148 00000004 07                              pop es
-   149 00000005 17                              pop ss
-   150                                      %endif
-   151 00000006 FC                              cld             ; Clear Direction flag
-   152 00000007 BF007F                          mov di,program  ; Point to program
-   153 0000000A B00D                            mov al,0x0d     ; Fill with CR
-   154 0000000C B9204E                          mov cx,max_size ; Max. program size
-   155 0000000F F3AA                            rep stosb       ; Initialize
+   141                                      %ifndef com_file    ; If not defined create a boot sector
+   142                                  com_file:       equ 0
+   143                                      %endif
+   144                                  
+   145                                      %if com_file
+   146                                          org 0x0100
+   147                                      %else
+   148                                          org 0x7c00
+   149                                      %endif
+   150                                  
+   151                                  vars:       equ 0x7e00  ; Variables (multiple of 256)
+   152                                  line:       equ 0x7e80  ; Line input
+   153                                  
+   154                                  program:    equ 0x8000  ; Program address
+   155                                                          ; (notice optimizations dependent on this address)
    156                                  
-   157                                          ;
-   158                                          ; Main loop
-   159                                          ;
-   160                                  main_loop:
-   161 00000011 BC00FF                          mov sp,stack    ; Reinitialize stack pointer
-   162 00000014 B8[1100]                        mov ax,main_loop
-   163 00000017 50                              push ax
-   164 00000018 31C0                            xor ax,ax       ; Mark as interactive
-   165 0000001A A37E7E                          mov [running],ax
-   166 0000001D B03E                            mov al,'>'      ; Show prompt
-   167 0000001F E85001                          call input_line ; Accept line
-   168 00000022 E80401                          call input_number       ; Get number
-   169 00000025 09C0                            or ax,ax        ; No number or zero?
-   170 00000027 740E                            je statement    ; Yes, jump
-   171 00000029 E83D01                          call find_line  ; Find the line
-   172 0000002C 97                              xchg ax,di      
-   173                                  ;       mov cx,max_length       ; CX loaded with this value in 'find_line'
-   174 0000002D F3A4                            rep movsb       ; Copy entered line into program
-   175 0000002F C3                              ret
-   176                                  
-   177                                          ;
-   178                                          ; Handle 'if' statement
-   179                                          ;
-   180                                  if_statement:
-   181 00000030 E86D00                          call expr       ; Process expression
-   182 00000033 09C0                            or ax,ax        ; Is it zero?
-   183 00000035 7459                            je f6           ; Yes, return (ignore if)
-   184                                  statement:
-   185 00000037 E8D200                          call spaces     ; Avoid spaces
-   186 0000003A 803C0D                          cmp byte [si],0x0d  ; Empty line?
-   187 0000003D 7451                            je f6           ; Yes, return
-   188 0000003F BF[C301]                        mov di,statements   ; Point to statements list
-   189 00000042 8A05                    f5:     mov al,[di]     ; Read length of the string
-   190 00000044 47                              inc di          ; Avoid length byte
-   191 00000045 25FF00                          and ax,0x00ff   ; Is it zero?
-   192 00000048 7413                            je f4           ; Yes, jump
-   193 0000004A 91                              xchg ax,cx
-   194 0000004B 56                              push si         ; Save current position
-   195 0000004C F3A6                    f16:    rep cmpsb       ; Compare statement
-   196 0000004E 7506                            jne f3          ; Equal? No, jump
-   197 00000050 58                              pop ax
-   198 00000051 E8B800                          call spaces     ; Avoid spaces
-   199 00000054 FF25                            jmp word [di]   ; Jump to process statement
-   200                                  
-   201 00000056 01CF                    f3:     add di,cx       ; Advance the list pointer
-   202 00000058 47                              inc di          ; Avoid the address
-   203 00000059 47                              inc di
-   204 0000005A 5E                              pop si
-   205 0000005B EBE5                            jmp f5          ; Compare another statement
-   206                                  
-   207 0000005D E8A500                  f4:     call get_variable       ; Try variable
-   208 00000060 50                              push ax         ; Save address
-   209 00000061 AC                              lodsb           ; Read a line letter
-   210 00000062 3C3D                            cmp al,'='      ; Is it assignment '=' ?
-   211 00000064 7434                            je assignment   ; Yes, jump to assignment.
-   212                                  
-   213                                          ;
-   214                                          ; An error happened
-   215                                          ;
-   216                                  error:
-   217 00000066 BE[6E00]                        mov si,error_message
-   218 00000069 E82601                          call print_2    ; Show error message
-   219 0000006C EBA3                            jmp main_loop   ; Exit to main loop
+   157                                  stack:      equ 0xff00  ; Stack address
+   158                                  max_line:   equ 1000    ; First unavailable line number
+   159                                  max_length: equ 20      ; Maximum length of line
+   160                                  max_size:   equ max_line*max_length ; Max. program size
+   161                                  
+   162                                  start:
+   163                                      %if com_file
+   164                                      %else
+   165 00000000 0E                              push cs         ; For boot sector
+   166 00000001 0E                              push cs         ; it needs to setup
+   167 00000002 0E                              push cs         ; DS, ES and SS.
+   168 00000003 1F                              pop ds
+   169 00000004 07                              pop es
+   170 00000005 17                              pop ss
+   171                                      %endif
+   172 00000006 FC                              cld             ; Clear Direction flag
+   173 00000007 BF0080                          mov di,program  ; Point to program
+   174 0000000A C6050D                  f14:    mov byte [di],0x0d ; Fill with Carriage Return (CR) character
+   175 0000000D 47                              inc di          ; Until reaching maximum 64K (DI becomes zero)
+   176 0000000E 75FA                            jne f14
+   177                                  
+   178                                          ;
+   179                                          ; Main loop
+   180                                          ;
+   181                                  main_loop:
+   182 00000010 BC00FF                          mov sp,stack    ; Reinitialize stack pointer
+   183 00000013 B8[1000]                        mov ax,main_loop
+   184 00000016 50                              push ax
+   185 00000017 B03E                            mov al,'>'      ; Show prompt
+   186 00000019 E84F01                          call input_line ; Accept line
+   187 0000001C E81101                          call input_number       ; Get number
+   188 0000001F 09C0                            or ax,ax        ; No number or zero?
+   189 00000021 740E                            je statement    ; Yes, jump
+   190 00000023 E89601                          call find_line  ; Find the line
+   191 00000026 97                              xchg ax,di      
+   192                                  ;       mov cx,max_length       ; CX loaded with this value in 'find_line'
+   193 00000027 F3A4                            rep movsb       ; Copy entered line into program
+   194 00000029 C3                              ret
+   195                                  
+   196                                          ;
+   197                                          ; Handle 'if' statement
+   198                                          ;
+   199                                  if_statement:
+   200 0000002A E86C00                          call expr       ; Process expression
+   201 0000002D 09C0                            or ax,ax        ; Is it zero?
+   202 0000002F 7458                            je f6           ; Yes, return (ignore if)
+   203                                  statement:
+   204 00000031 E8E200                          call spaces     ; Avoid spaces
+   205 00000034 803C0D                          cmp byte [si],0x0d  ; Empty line?
+   206 00000037 7450                            je f6           ; Yes, return
+   207 00000039 BF[C501]                        mov di,statements   ; Point to statements list
+   208 0000003C 8A05                    f5:     mov al,[di]     ; Read length of the string
+   209 0000003E 47                              inc di          ; Avoid length byte
+   210 0000003F 98                              cbw             ; Make AH zero
+   211 00000040 48                              dec ax          ; Is it zero?
+   212 00000041 7413                            je f4           ; Yes, jump
+   213 00000043 91                              xchg ax,cx
+   214 00000044 56                              push si         ; Save current position
+   215 00000045 F3A6                    f16:    rep cmpsb       ; Compare statement
+   216 00000047 7506                            jne f3          ; Equal? No, jump
+   217 00000049 58                              pop ax
+   218 0000004A E8C900                          call spaces     ; Avoid spaces
+   219 0000004D FF25                            jmp word [di]   ; Jump to process statement
    220                                  
-   221                                  error_message:
-   222 0000006E 4023210D                        db "@#!",0x0d   ; Guess the words :P
-   223                                  
-   224                                          ;
-   225                                          ; Handle 'list' statement
-   226                                          ;
-   227                                  list_statement:
-   228 00000072 31C0                            xor ax,ax       ; Start from line zero
-   229 00000074 50                      f29:    push ax
-   230 00000075 E8F100                          call find_line  ; Find program line
-   231 00000078 96                              xchg ax,si
-   232 00000079 803C0D                          cmp byte [si],0x0d ; Empty line?
-   233 0000007C 740B                            je f30          ; Yes, jump
-   234 0000007E 58                              pop ax
-   235 0000007F 50                              push ax
-   236 00000080 E89100                          call output_number ; Show line number
-   237 00000083 AC                      f32:    lodsb           ; Show line contents
-   238 00000084 E82701                          call output
-   239 00000087 75FA                            jne f32         ; Jump if it wasn't 0x0d (CR)
-   240 00000089 58                      f30:    pop ax
-   241 0000008A 40                              inc ax          ; Go to next line
-   242 0000008B 3DE803                          cmp ax,max_line ; Finished?
-   243 0000008E 75E4                            jne f29         ; No, continue
-   244                                  f6:
-   245 00000090 C3                              ret
-   246                                  
-   247                                          ;
-   248                                          ; Handle 'input' statement
-   249                                          ;
-   250                                  input_statement:
-   251 00000091 E87100                          call get_variable   ; Get variable address
-   252 00000094 50                              push ax             ; Save it
-   253 00000095 B03F                            mov al,'?'          ; Prompt
-   254 00000097 E8D800                          call input_line     ; Wait for line
-   255                                          ;
-   256                                          ; Second part of the assignment statement
-   257                                          ;
-   258                                  assignment:
-   259 0000009A E80300                          call expr           ; Process expression
-   260 0000009D 5F                              pop di
-   261 0000009E AB                              stosw               ; Save onto variable
-   262 0000009F C3                              ret
-   263                                  
-   264                                          ;
-   265                                          ; Handle an expression.
-   266                                          ; First tier: addition & subtraction.
+   221 0000004F 01CF                    f3:     add di,cx       ; Advance the list pointer
+   222 00000051 47                              inc di          ; Avoid the address
+   223 00000052 47                              inc di
+   224 00000053 5E                              pop si
+   225 00000054 EBE6                            jmp f5          ; Compare another statement
+   226                                  
+   227 00000056 E8B400                  f4:     call get_variable       ; Try variable
+   228 00000059 50                              push ax         ; Save address
+   229 0000005A AC                              lodsb           ; Read a line letter
+   230 0000005B 3C3D                            cmp al,'='      ; Is it assignment '=' ?
+   231 0000005D 7434                            je assignment   ; Yes, jump to assignment.
+   232                                  
+   233                                          ;
+   234                                          ; An error happened
+   235                                          ;
+   236                                  error:
+   237 0000005F BE[6700]                        mov si,error_message
+   238 00000062 E82601                          call print_2    ; Show error message
+   239 00000065 EBA9                            jmp main_loop   ; Exit to main loop
+   240                                  
+   241                                  error_message:
+   242 00000067 4023210D                        db "@#!",0x0d   ; Guess the words :P
+   243                                  
+   244                                          ;
+   245                                          ; Handle 'list' statement
+   246                                          ;
+   247                                  list_statement:
+   248 0000006B 31C0                            xor ax,ax       ; Start from line zero
+   249 0000006D 50                      f29:    push ax
+   250 0000006E E84B01                          call find_line  ; Find program line
+   251 00000071 96                              xchg ax,si
+   252 00000072 803C0D                          cmp byte [si],0x0d ; Empty line?
+   253 00000075 740B                            je f30          ; Yes, jump
+   254 00000077 58                              pop ax
+   255 00000078 50                              push ax
+   256 00000079 E8A000                          call output_number ; Show line number
+   257 0000007C AC                      f32:    lodsb           ; Show line contents
+   258 0000007D E82901                          call output
+   259 00000080 75FA                            jne f32         ; Jump if it wasn't 0x0d (CR)
+   260 00000082 58                      f30:    pop ax
+   261 00000083 40                              inc ax          ; Go to next line
+   262 00000084 3DE803                          cmp ax,max_line ; Finished?
+   263 00000087 75E4                            jne f29         ; No, continue
+   264                                  f6:
+   265 00000089 C3                              ret
+   266                                  
    267                                          ;
-   268                                  expr:
-   269 000000A0 E81C00                          call expr1          ; Call second tier
-   270 000000A3 803C2D                  f20:    cmp byte [si],'-'   ; Subtraction operator?
-   271 000000A6 740E                            je f19              ; Yes, jump
-   272 000000A8 803C2B                          cmp byte [si],'+'   ; Addition operator?
-   273 000000AB 75E3                            jne f6              ; No, return
-   274 000000AD 50                              push ax
-   275 000000AE E80D00                          call expr1_2        ; Call second tier
-   276 000000B1 59                      f15:    pop cx
-   277 000000B2 01C8                            add ax,cx           ; Addition
-   278 000000B4 EBED                            jmp f20             ; Find more operators
-   279                                  
-   280                                  f19:
-   281 000000B6 50                              push ax
-   282 000000B7 E80400                          call expr1_2        ; Call second tier
-   283 000000BA F7D8                            neg ax              ; Negate it (a - b converted to a + -b)
-   284 000000BC EBF3                            jmp f15
-   285                                  
-   286                                          ;
-   287                                          ; Handle an expression.
-   288                                          ; Second tier: division & multiplication.
-   289                                          ;
-   290                                  expr1_2:
-   291 000000BE 46                              inc si              ; Avoid operator
-   292                                  expr1:
-   293 000000BF E81F00                          call expr2          ; Call third tier
-   294 000000C2 803C2F                  f21:    cmp byte [si],'/'   ; Division operator?
-   295 000000C5 740E                            je f23              ; Yes, jump
-   296 000000C7 803C2A                          cmp byte [si],'*'   ; Multiplication operator?
-   297 000000CA 75C4                            jne f6              ; No, return
-   298                                  
-   299 000000CC 50                              push ax
-   300 000000CD E81000                          call expr2_2        ; Call third tier
-   301 000000D0 59                              pop cx
-   302 000000D1 F7E9                            imul cx             ; Multiplication
-   303 000000D3 EBED                            jmp f21             ; Find more operators
-   304                                  
-   305                                  f23:
-   306 000000D5 50                              push ax
-   307 000000D6 E80700                          call expr2_2        ; Call third tier
-   308 000000D9 59                              pop cx
-   309 000000DA 91                              xchg ax,cx
-   310 000000DB 99                              cwd                 ; Expand AX to DX:AX
-   311 000000DC F7F9                            idiv cx             ; Signed division
-   312 000000DE EBE2                            jmp f21             ; Find more operators
-   313                                  
-   314                                          ;
-   315                                          ; Handle an expression.
-   316                                          ; Third tier: parentheses, numbers and vars.
-   317                                          ;
-   318                                  expr2_2:
-   319 000000E0 46                              inc si              ; Avoid operator
-   320                                  expr2:
-   321 000000E1 E82800                          call spaces         ; Jump spaces
-   322 000000E4 AC                              lodsb               ; Read character
-   323 000000E5 3C28                            cmp al,'('          ; Open parenthesis?
-   324 000000E7 750B                            jne f24
-   325 000000E9 E8B4FF                          call expr           ; Process inner expr.
-   326 000000EC 803C29                          cmp byte [si],')'   ; Closing parenthesis?
-   327 000000EF 7420                            je spaces_2         ; Yes, avoid spaces
-   328 000000F1 E972FF                          jmp error           ; No, jump to error
-   329                                  
-   330 000000F4 3C40                    f24:    cmp al,0x40         ; Variable?
-   331 000000F6 7306                            jnc f25             ; Yes, jump
-   332 000000F8 4E                              dec si              ; Back one letter...
-   333 000000F9 E82D00                          call input_number   ; ...to read number
-   334 000000FC EB0E                            jmp spaces          ; Avoid spaces
-   335                                          
-   336 000000FE E80500                  f25:    call get_variable_2 ; Get variable address
-   337 00000101 93                              xchg ax,bx
-   338 00000102 8B07                            mov ax,[bx]         ; Read
-   339 00000104 C3                              ret                 ; Return
-   340                                  
-   341                                          ;
-   342                                          ; Get variable address
-   343                                          ;
-   344                                  get_variable:
-   345 00000105 AC                              lodsb               ; Read source
-   346                                  get_variable_2:
-   347 00000106 241F                            and al,0x1f         ; 0x61-0x7a -> 0x01-0x1a
-   348 00000108 00C0                            add al,al           ; x 2 (each variable = word)
-   349 0000010A B47E                            mov ah,vars>>8      ; Setup high-byte of address
-   350                                          ;
-   351                                          ; Avoid spaces
-   352                                          ;
-   353                                  spaces:
-   354 0000010C 803C20                          cmp byte [si],' '   ; Space found?
-   355 0000010F 752D                            jne f22             ; No, return
-   356                                          ;
-   357                                          ; Avoid spaces after current character
-   358                                          ;
-   359                                  spaces_2:
-   360 00000111 46                              inc si              ; Advance to next character
-   361 00000112 EBF8                            jmp spaces
-   362                                  
-   363                                          ;
-   364                                          ; Output unsigned number 
-   365                                          ; AX = value
-   366                                          ;
-   367                                  output_number:
-   368                                  f26:
-   369 00000114 31D2                            xor dx,dx           ; DX:AX
-   370 00000116 B90A00                          mov cx,10           ; Divisor = 10
-   371 00000119 F7F1                            div cx              ; Divide
-   372 0000011B 09C0                            or ax,ax            ; Nothing at left?
-   373 0000011D 52                              push dx
-   374 0000011E 7403                            je f8               ; No, jump
-   375 00000120 E8F1FF                          call f26            ; Yes, output left side
-   376 00000123 58                      f8:     pop ax
-   377 00000124 0430                            add al,'0'          ; Output remainder as...
-   378 00000126 E98500                          jmp output          ; ...ASCII digit
-   379                                  
-   380                                          ;
-   381                                          ; Read number in input
-   382                                          ; AX = result
+   268                                          ; Handle 'input' statement
+   269                                          ;
+   270                                  input_statement:
+   271 0000008A E88000                          call get_variable   ; Get variable address
+   272 0000008D 50                              push ax             ; Save it
+   273 0000008E B03F                            mov al,'?'          ; Prompt
+   274 00000090 E8D800                          call input_line     ; Wait for line
+   275                                          ;
+   276                                          ; Second part of the assignment statement
+   277                                          ;
+   278                                  assignment:
+   279 00000093 E80300                          call expr           ; Process expression
+   280 00000096 5F                              pop di
+   281 00000097 AB                              stosw               ; Save onto variable
+   282 00000098 C3                              ret
+   283                                  
+   284                                          ;
+   285                                          ; Handle an expression.
+   286                                          ; First tier: addition & subtraction.
+   287                                          ;
+   288                                  expr:
+   289 00000099 E81C00                          call expr1          ; Call second tier
+   290 0000009C 803C2D                  f20:    cmp byte [si],'-'   ; Subtraction operator?
+   291 0000009F 740E                            je f19              ; Yes, jump
+   292 000000A1 803C2B                          cmp byte [si],'+'   ; Addition operator?
+   293 000000A4 75E3                            jne f6              ; No, return
+   294 000000A6 50                              push ax
+   295 000000A7 E80D00                          call expr1_2        ; Call second tier
+   296 000000AA 59                      f15:    pop cx
+   297 000000AB 01C8                            add ax,cx           ; Addition
+   298 000000AD EBED                            jmp f20             ; Find more operators
+   299                                  
+   300                                  f19:
+   301 000000AF 50                              push ax
+   302 000000B0 E80400                          call expr1_2        ; Call second tier
+   303 000000B3 F7D8                            neg ax              ; Negate it (a - b converted to a + -b)
+   304 000000B5 EBF3                            jmp f15
+   305                                  
+   306                                          ;
+   307                                          ; Handle an expression.
+   308                                          ; Second tier: division & multiplication.
+   309                                          ;
+   310                                  expr1_2:
+   311 000000B7 46                              inc si              ; Avoid operator
+   312                                  expr1:
+   313 000000B8 E81F00                          call expr2          ; Call third tier
+   314 000000BB 803C2F                  f21:    cmp byte [si],'/'   ; Division operator?
+   315 000000BE 740E                            je f23              ; Yes, jump
+   316 000000C0 803C2A                          cmp byte [si],'*'   ; Multiplication operator?
+   317 000000C3 75C4                            jne f6              ; No, return
+   318                                  
+   319 000000C5 50                              push ax
+   320 000000C6 E81000                          call expr2_2        ; Call third tier
+   321 000000C9 59                              pop cx
+   322 000000CA F7E9                            imul cx             ; Multiplication
+   323 000000CC EBED                            jmp f21             ; Find more operators
+   324                                  
+   325                                  f23:
+   326 000000CE 50                              push ax
+   327 000000CF E80700                          call expr2_2        ; Call third tier
+   328 000000D2 59                              pop cx
+   329 000000D3 91                              xchg ax,cx
+   330 000000D4 99                              cwd                 ; Expand AX to DX:AX
+   331 000000D5 F7F9                            idiv cx             ; Signed division
+   332 000000D7 EBE2                            jmp f21             ; Find more operators
+   333                                  
+   334                                          ;
+   335                                          ; Handle an expression.
+   336                                          ; Third tier: parentheses, numbers and vars.
+   337                                          ;
+   338                                  expr2_2:
+   339 000000D9 46                              inc si              ; Avoid operator
+   340                                  expr2:
+   341 000000DA E83900                          call spaces         ; Jump spaces
+   342 000000DD AC                              lodsb               ; Read character
+   343 000000DE 3C28                            cmp al,'('          ; Open parenthesis?
+   344 000000E0 750B                            jne f24
+   345 000000E2 E8B4FF                          call expr           ; Process inner expr.
+   346 000000E5 803C29                          cmp byte [si],')'   ; Closing parenthesis?
+   347 000000E8 742B                            je spaces_2         ; Yes, avoid spaces
+   348 000000EA E972FF                          jmp error           ; No, jump to error
+   349                                  
+   350 000000ED 3C40                    f24:    cmp al,0x40         ; Variable?
+   351 000000EF 7306                            jnc f25             ; Yes, jump
+   352 000000F1 4E                              dec si              ; Back one letter...
+   353 000000F2 E83B00                          call input_number   ; ...to read number
+   354 000000F5 EB1F                            jmp short spaces
+   355                                  
+   356 000000F7 3C72                    f25:    cmp al,0x72
+   357 000000F9 750B                            jne f22
+   358 000000FB 803C6E                          cmp byte [si],0x6e
+   359 000000FE 7506                            jne f22
+   360 00000100 AD                              lodsw               ; Advance SI by 2
+   361 00000101 E440                            in al,0x40          ; Read timer counter 0
+   362 00000103 B400                            mov ah,0       
+   363 00000105 C3                              ret
+   364                                  
+   365 00000106 E80500                  f22:    call get_variable_2 ; Get variable address
+   366 00000109 93                              xchg ax,bx
+   367 0000010A 8B07                            mov ax,[bx]         ; Read
+   368 0000010C C3                              ret                 ; Return
+   369                                  
+   370                                          ;
+   371                                          ; Get variable address.
+   372                                          ; Also avoid spaces.
+   373                                          ;
+   374                                  get_variable:
+   375 0000010D AC                              lodsb               ; Read source
+   376                                  get_variable_2:
+   377 0000010E 241F                            and al,0x1f         ; 0x61-0x7a -> 0x01-0x1a
+   378 00000110 00C0                            add al,al           ; x 2 (each variable = word)
+   379 00000112 B47E                            mov ah,vars>>8      ; Setup high-byte of address
+   380 00000114 4E                              dec si
+   381                                          ;
+   382                                          ; Avoid spaces after current character
    383                                          ;
-   384                                  input_number:
-   385 00000129 31DB                            xor bx,bx           ; BX = 0
-   386 0000012B AC                      f11:    lodsb               ; Read source
-   387 0000012C 2C30                            sub al,'0'
-   388 0000012E 3C0A                            cmp al,10           ; Digit valid?
-   389 00000130 98                              cbw
-   390 00000131 93                              xchg ax,bx
-   391 00000132 7309                            jnc f12             ; No, jump
-   392 00000134 B90A00                          mov cx,10           ; Multiply by 10
-   393 00000137 F7E1                            mul cx
-   394 00000139 01C3                            add bx,ax           ; Add new digit
-   395 0000013B EBEE                            jmp f11             ; Continue
-   396                                  
-   397 0000013D 4E                      f12:    dec si              ; SI points to first non-digit
-   398                                  f22:
-   399 0000013E C3                              ret
-   400                                  
-   401                                          ;
-   402                                          ; Handle 'system' statement
-   403                                          ;
-   404                                  system_statement:
-   405 0000013F CD20                            int 0x20
-   406                                  
-   407                                          ;
-   408                                          ; Handle 'goto' statement
-   409                                          ;
-   410                                  goto_statement:
-   411 00000141 E85CFF                          call expr           ; Handle expression
-   412 00000144 B9                              db 0xb9             ; MOV CX to jump over XOR AX,AX
-   413                                  
-   414                                          ;
-   415                                          ; Handle 'run' statement
-   416                                          ; (equivalent to 'goto 0')
-   417                                          ;
-   418                                  run_statement:
-   419 00000145 31C0                            xor ax,ax           
-   420                                  f10:
-   421 00000147 E81F00                          call find_line      ; Find line in program
-   422 0000014A 833E7E7E00              f27:    cmp word [running],0 ; Already running?
-   423 0000014F 7404                            je f31
-   424 00000151 A37E7E                          mov [running],ax    ; Yes, target is new line
-   425 00000154 C3                              ret
-   426                                  f31:
-   427 00000155 50                              push ax
-   428 00000156 5E                              pop si
-   429 00000157 83C014                          add ax,max_length   ; Point to next line
-   430 0000015A A37E7E                          mov [running],ax    ; Save for next time
-   431 0000015D E8D7FE                          call statement      ; Process current statement
-   432 00000160 A17E7E                          mov ax,[running]
-   433 00000163 3D20CD                          cmp ax,program+max_size ; Reached the end?
-   434 00000166 75ED                            jne f31             ; No, continue
-   435 00000168 C3                              ret                 ; Yes, return
-   436                                  
-   437                                          ;
-   438                                          ; Find line in program
-   439                                          ; Entry:
-   440                                          ;   ax = line number
-   441                                          ; Result:
-   442                                          ;   ax = pointer to program
-   443                                  find_line:
-   444 00000169 B91400                          mov cx,max_length
-   445 0000016C F7E1                            mul cx
-   446 0000016E 05007F                          add ax,program
-   447 00000171 C3                              ret
-   448                                  
+   384                                  spaces_2:
+   385 00000115 46                              inc si
+   386                                          ;
+   387                                          ; Avoid spaces
+   388                                          ; The interpreter depends on this routine not modifying AX
+   389                                          ;
+   390                                  spaces:
+   391 00000116 803C20                          cmp byte [si],' '   ; Space found?
+   392 00000119 74FA                            je spaces_2         ; Yes, move one character ahead.
+   393 0000011B C3                              ret                 ; No, return.
+   394                                  
+   395                                          ;
+   396                                          ; Output unsigned number 
+   397                                          ; AX = value
+   398                                          ;
+   399                                  output_number:
+   400                                  f26:
+   401 0000011C 31D2                            xor dx,dx           ; DX:AX
+   402 0000011E B90A00                          mov cx,10           ; Divisor = 10
+   403 00000121 F7F1                            div cx              ; Divide
+   404 00000123 09C0                            or ax,ax            ; Nothing at left?
+   405 00000125 52                              push dx
+   406 00000126 7403                            je f8               ; No, jump
+   407 00000128 E8F1FF                          call f26            ; Yes, output left side
+   408 0000012B 58                      f8:     pop ax
+   409 0000012C 0430                            add al,'0'          ; Output remainder as...
+   410 0000012E EB79                            jmp short output    ; ...ASCII digit
+   411                                  
+   412                                          ;
+   413                                          ; Read number in input
+   414                                          ; Also avoid spaces afterwards.
+   415                                          ; AX = result
+   416                                          ;
+   417                                  input_number:
+   418 00000130 31DB                            xor bx,bx           ; BX = 0
+   419 00000132 AC                      f11:    lodsb               ; Read source
+   420 00000133 2C30                            sub al,'0'
+   421 00000135 3C0A                            cmp al,10           ; Digit valid?
+   422 00000137 98                              cbw
+   423 00000138 93                              xchg ax,bx
+   424 00000139 7309                            jnc f12             ; No, jump
+   425 0000013B B90A00                          mov cx,10           ; Multiply by 10
+   426 0000013E F7E1                            mul cx
+   427 00000140 01C3                            add bx,ax           ; Add new digit
+   428 00000142 EBEE                            jmp f11             ; Continue
+   429                                  
+   430 00000144 4E                      f12:    dec si              ; SI points to first non-digit
+   431 00000145 C3                              ret
+   432                                  
+   433                                          ;
+   434                                          ; Handle 'system' statement
+   435                                          ;
+   436                                  system_statement:
+   437 00000146 CD20                            int 0x20
+   438                                  
+   439                                          ;
+   440                                          ; Handle 'goto' statement
+   441                                          ;
+   442                                  goto_statement:
+   443 00000148 E84EFF                          call expr           ; Handle expression
+   444 0000014B B9                              db 0xb9             ; MOV CX to jump over XOR AX,AX
+   445                                  
+   446                                          ;
+   447                                          ; Handle 'run' statement
+   448                                          ; (equivalent to 'goto 0')
    449                                          ;
-   450                                          ; Input line from keyboard
-   451                                          ; Entry:
-   452                                          ;   al = prompt character
-   453                                          ; Result:
-   454                                          ;   buffer 'line' contains line, finished with CR
-   455                                          ;   SI points to 'line'.
-   456                                          ;
-   457                                  input_line:
-   458 00000172 E83900                          call output
-   459 00000175 BE807E                          mov si,line
-   460 00000178 56                              push si
-   461 00000179 5F                              pop di          ; Target for writing line
-   462 0000017A E82D00                  f1:     call input_key  ; Read keyboard
-   463 0000017D AA                              stosb           ; Save key in buffer
-   464 0000017E 3C08                            cmp al,0x08     ; Backspace?
-   465 00000180 7502                            jne f2          ; No, jump
-   466 00000182 4F                              dec di          ; Get back one character
-   467 00000183 4F                              dec di
-   468 00000184 3C0D                    f2:     cmp al,0x0d     ; CR pressed?
-   469 00000186 75F2                            jne f1          ; No, wait another key
-   470 00000188 C3                              ret             ; Yes, return
-   471                                  
-   472                                          ;
-   473                                          ; Handle "print" statement
-   474                                          ;
-   475                                  print_statement:
-   476 00000189 AC                              lodsb           ; Read source
-   477 0000018A 3C0D                            cmp al,0x0d     ; End of line?
-   478 0000018C 7424                            je new_line     ; Yes, generate new line and return
-   479 0000018E 3C22                            cmp al,'"'      ; Double quotes?
-   480 00000190 750B                            jne f7          ; No, jump
-   481                                  print_2:
-   482                                  f9:
-   483 00000192 AC                              lodsb           ; Read string contents
-   484 00000193 3C22                            cmp al,'"'      ; Double quotes?
-   485 00000195 740D                            je f18          ; Yes, jump
-   486 00000197 E81400                          call output     ; Output character
-   487 0000019A 75F6                            jne f9          ; Jump if not finished with 0x0d (CR)
-   488 0000019C C3                              ret             ; Return
-   489                                  
-   490 0000019D 4E                      f7:     dec si
-   491 0000019E E8FFFE                          call expr       ; Handle expression
-   492 000001A1 E870FF                          call output_number      ; Output result
-   493 000001A4 AC                      f18:    lodsb           ; Read next character
-   494 000001A5 3C3B                            cmp al,';'      ; Is it semicolon?
-   495 000001A7 7509                            jne new_line    ; No, jump to generate new line
-   496 000001A9 C3                              ret             ; Yes, return
-   497                                  
-   498                                          ;
-   499                                          ; Read a key into al
-   500                                          ; Also outputs it to screen
-   501                                          ;
-   502                                  input_key:
-   503 000001AA B400                            mov ah,0x00
-   504 000001AC CD16                            int 0x16
-   505                                          ;
-   506                                          ; Screen output of character contained in al
-   507                                          ; Expands 0x0d (CR) into 0x0a 0x0d (LF CR)
-   508                                          ;
-   509                                  output:
-   510 000001AE 3C0D                            cmp al,0x0d
-   511 000001B0 7507                            jne f17
-   512                                          ;
-   513                                          ; Go to next line (generates LF+CR)
-   514                                          ;
-   515                                  new_line:
-   516 000001B2 B00A                            mov al,0x0a
-   517 000001B4 E80200                          call f17
-   518 000001B7 B00D                            mov al,0x0d
-   519                                  f17:
-   520 000001B9 B40E                            mov ah,0x0e
-   521 000001BB BB0700                          mov bx,0x0007
-   522 000001BE CD10                            int 0x10
-   523 000001C0 3C0D                            cmp al,0x0d
-   524 000001C2 C3                              ret
-   525                                  
+   450                                  run_statement:
+   451 0000014C 31C0                            xor ax,ax           
+   452                                  f10:
+   453 0000014E E86B00                          call find_line      ; Find line in program
+   454 00000151 81FCFEFE                f27:    cmp sp,stack-2      ; In interactive mode?
+   455 00000155 7404                            je f31              ; Yes, jump.
+   456 00000157 A3FCFE                          mov [stack-4],ax    ; No, replace the saved address of next line
+   457 0000015A C3                              ret
+   458                                  f31:
+   459 0000015B 50                              push ax
+   460 0000015C 5E                              pop si
+   461 0000015D 051400                          add ax,max_length   ; Point to next line
+   462 00000160 50                              push ax             ; Save for next time (this goes into address stack-4)
+   463 00000161 E8CDFE                          call statement      ; Process current statement
+   464 00000164 58                              pop ax              ; Restore address of next line (could have changed)
+   465 00000165 3D20CE                          cmp ax,program+max_size ; Reached the end?
+   466 00000168 75F1                            jne f31             ; No, continue
+   467 0000016A C3                              ret                 ; Yes, return
+   468                                  
+   469                                          ;
+   470                                          ; Input line from keyboard
+   471                                          ; Entry:
+   472                                          ;   al = prompt character
+   473                                          ; Result:
+   474                                          ;   buffer 'line' contains line, finished with CR
+   475                                          ;   SI points to 'line'.
+   476                                          ;
+   477                                  input_line:
+   478 0000016B E83B00                          call output
+   479 0000016E BE807E                          mov si,line
+   480 00000171 56                              push si
+   481 00000172 5F                              pop di          ; Target for writing line
+   482 00000173 E82F00                  f1:     call input_key  ; Read keyboard
+   483 00000176 AA                              stosb           ; Save key in buffer
+   484 00000177 3C08                            cmp al,0x08     ; Backspace?
+   485 00000179 7502                            jne f2          ; No, jump
+   486 0000017B 4F                              dec di          ; Get back one character
+   487 0000017C 4F                              dec di
+   488 0000017D 3C0D                    f2:     cmp al,0x0d     ; CR pressed?
+   489 0000017F 75F2                            jne f1          ; No, wait another key
+   490 00000181 C3                              ret             ; Yes, return
+   491                                  
+   492                                          ;
+   493                                          ; Handle "print" statement
+   494                                          ;
+   495                                  print_statement:
+   496 00000182 AC                              lodsb           ; Read source
+   497 00000183 3C0D                            cmp al,0x0d     ; End of line?
+   498 00000185 7426                            je new_line     ; Yes, generate new line and return
+   499 00000187 3C22                            cmp al,'"'      ; Double quotes?
+   500 00000189 750D                            jne f7          ; No, jump
+   501                                  print_2:
+   502                                  f9:
+   503 0000018B AC                              lodsb           ; Read string contents
+   504 0000018C 3C22                            cmp al,'"'      ; Double quotes?
+   505 0000018E 740F                            je f18          ; Yes, jump
+   506 00000190 E81600                          call output     ; Output character
+   507 00000193 3C0D                            cmp al,0x0d     ; 
+   508 00000195 75F4                            jne f9          ; Jump if not finished with 0x0d (CR)
+   509 00000197 C3                              ret             ; Return
+   510                                  
+   511 00000198 4E                      f7:     dec si
+   512 00000199 E8FDFE                          call expr       ; Handle expression
+   513 0000019C E87DFF                          call output_number      ; Output result
+   514 0000019F AC                      f18:    lodsb           ; Read next character
+   515 000001A0 3C3B                            cmp al,';'      ; Is it semicolon?
+   516 000001A2 7509                            jne new_line    ; No, jump to generate new line
+   517 000001A4 C3                              ret             ; Yes, return
+   518                                  
+   519                                          ;
+   520                                          ; Read a key into al
+   521                                          ; Also outputs it to screen
+   522                                          ;
+   523                                  input_key:
+   524 000001A5 B400                            mov ah,0x00
+   525 000001A7 CD16                            int 0x16
    526                                          ;
-   527                                          ; List of statements of bootBASIC
-   528                                          ; First one byte with length of string
-   529                                          ; Then string with statement
-   530                                          ; Then a word with the address of the code
-   531                                          ;
-   532                                  statements:
-   533 000001C3 036E6577                        db 3,"new"
-   534 000001C7 [0000]                          dw start
-   535                                  
-   536 000001C9 046C697374                      db 4,"list"
-   537 000001CE [7200]                          dw list_statement
-   538                                  
-   539 000001D0 0372756E                        db 3,"run"
-   540 000001D4 [4501]                          dw run_statement
-   541                                  
-   542 000001D6 057072696E74                    db 5,"print"
-   543 000001DC [8901]                          dw print_statement
-   544                                  
-   545 000001DE 05696E707574                    db 5,"input"
-   546 000001E4 [9100]                          dw input_statement
-   547                                  
-   548 000001E6 026966                          db 2,"if"
-   549 000001E9 [3000]                          dw if_statement
-   550                                  
-   551 000001EB 04676F746F                      db 4,"goto"
-   552 000001F0 [4101]                          dw goto_statement
-   553                                  
-   554 000001F2 0673797374656D                  db 6,"system"
-   555 000001F9 [3F01]                          dw system_statement
-   556                                  
-   557 000001FB 00                              db 0
+   527                                          ; Screen output of character contained in al
+   528                                          ; Expands 0x0d (CR) into 0x0a 0x0d (LF CR)
+   529                                          ;
+   530                                  output:
+   531 000001A9 3C0D                            cmp al,0x0d
+   532 000001AB 7507                            jne f17
+   533                                          ;
+   534                                          ; Go to next line (generates LF+CR)
+   535                                          ;
+   536                                  new_line:
+   537 000001AD B00A                            mov al,0x0a
+   538 000001AF E80200                          call f17
+   539 000001B2 B00D                            mov al,0x0d
+   540                                  f17:
+   541 000001B4 B40E                            mov ah,0x0e
+   542 000001B6 BB0700                          mov bx,0x0007
+   543 000001B9 CD10                            int 0x10
+   544 000001BB C3                              ret
+   545                                  
+   546                                          ;
+   547                                          ; Find line in program
+   548                                          ; Entry:
+   549                                          ;   ax = line number
+   550                                          ; Result:
+   551                                          ;   ax = pointer to program.
+   552                                          ;   cx = max. length allowed for line.
+   553                                  find_line:
+   554 000001BC B91400                          mov cx,max_length
+   555 000001BF F7E1                            mul cx
+   556 000001C1 050080                          add ax,program
+   557 000001C4 C3                              ret
    558                                  
    559                                          ;
-   560                                          ; Boot sector filler
-   561                                          ;
-   562                                      %if com_file
-   563                                      %else
-   564 000001FC 4F<rept>                        times 510-($-$$) db 0x4f
-   565 000001FE 55AA                            db 0x55,0xaa            ; Make it a bootable sector
-   566                                      %endif
-   567                                  
+   560                                          ; List of statements of bootBASIC
+   561                                          ; First one byte with length of string
+   562                                          ; Then string with statement
+   563                                          ; Then a word with the address of the code
+   564                                          ;
+   565                                  statements:
+   566 000001C5 046E6577                        db 4,"new"
+   567 000001C9 [0000]                          dw start
+   568                                  
+   569 000001CB 056C697374                      db 5,"list"
+   570 000001D0 [6B00]                          dw list_statement
+   571                                  
+   572 000001D2 0472756E                        db 4,"run"
+   573 000001D6 [4C01]                          dw run_statement
+   574                                  
+   575 000001D8 067072696E74                    db 6,"print"
+   576 000001DE [8201]                          dw print_statement
+   577                                  
+   578 000001E0 06696E707574                    db 6,"input"
+   579 000001E6 [8A00]                          dw input_statement
+   580                                  
+   581 000001E8 036966                          db 3,"if"
+   582 000001EB [2A00]                          dw if_statement
+   583                                  
+   584 000001ED 05676F746F                      db 5,"goto"
+   585 000001F2 [4801]                          dw goto_statement
+   586                                  
+   587 000001F4 0773797374656D                  db 7,"system"
+   588 000001FB [4601]                          dw system_statement
+   589                                  
+   590 000001FD 01                              db 1
+   591                                  
+   592                                          ;
+   593                                          ; Boot sector filler
+   594                                          ;
+   595                                      %if com_file
+   596                                      %else
+   597                                          times 510-($-$$) db 0x4f
+   598 000001FE 55AA                            db 0x55,0xaa            ; Make it a bootable sector
+   599                                      %endif
+   600                                  
