@@ -50,7 +50,7 @@ Line numbers can be 1 to 999.
 26 variables are available (a-z)
 
 Numbers (0-65535) can be entered and display as unsigned.
-        
+       
 To enter new program lines:
   10 print "Hello, world!"
         
@@ -153,6 +153,17 @@ Sample program of guessing the dice:
 100 goto 120
 110 print "miss"
 120 print b
+
+
+>> LINKS <<
+
+Taisuke Fukuno made a 64-bit version of bootBASIC for
+Mac OS X, a small article about it is available at:
+
+    https://fukuno.jig.jp/2853
+
+  Source code:
+    https://github.com/taisukef/bootBASIC_64bit
 
 
 >> ATTENTION <<        
