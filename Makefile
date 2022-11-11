@@ -6,14 +6,17 @@ src = basic.asm
 all: basic.img basic.com basic.rom
 
 basic.rom: $(src) addchecksum
-	nasm -f bin -o $@ -Dbootrom=1 -Dbootsect=0 -Dcom_file=0 $(src)
+	nasm -f bin -o $@.tmp -Dbootrom $(src)
+	dd if=/dev/zero of=$@ bs=1 count=1024
+	dd if=$@.tmp of=$@ bs=1 conv=notrunc
 	./addchecksum $@ || rm $@
+	rm $@.tmp
 
 basic.img: $(src)
-	nasm -f bin -o $@ -Dbootsect=1 -Dbootrom=0 -Dcom_file=0 $(src)
+	nasm -f bin -o $@ -Dbootsect $(src)
 
 basic.com: $(src)
-	nasm -f bin -o $@ -Dcom_file=1 -Dbootsect=0 -Dbootrom=0 $(src)
+	nasm -f bin -o $@ -Dcom_file $(src)
 
 addchecksum: addchecksum.c
 	gcc -o $@ $< -Wall
@@ -26,10 +29,10 @@ clean:
 rundosbox: basic.com
 	dosbox $<
 
-.PHONY: fdrunqemu
-runqemu: basic.img
+.PHONY: runqemufd
+runqemufd: basic.img
 	qemu-system-i386 -fda basic.img
 
-.PHONY: romrunqemu
-runqemu: basic.rom
+.PHONY: runqemurom
+runqemurom: basic.rom
 	qemu-system-i386  -net none -option-rom basic.rom

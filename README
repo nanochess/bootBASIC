@@ -5,7 +5,7 @@
 | |_) | (_) | (_) | |_| |_/ / | | |/\__/ /_| |_| \__/\
 |_.__/ \___/ \___/ \__\____/\_| |_/\____/ \___/ \____/
 
-bootBASIC interpreter in 512 bytes (boot sector or COM file)
+bootBASIC interpreter in 512 bytes (boot sector, ROM BIOS or COM file)
 by Oscar Toledo G. Jul/22/2019
 
 http://nanochess.org
@@ -20,13 +20,28 @@ If you want to assemble it, you must download the Netwide Assembler
 
 Use this command line:
 
-  nasm -f bin basic.asm -Dcom_file=1 -o basic.com
-  nasm -f bin basic.asm -Dcom_file=0 -o basic.img
+  nasm -f bin basic.asm -Dcom_file -o basic.com
+  nasm -f bin basic.asm -Dbootsect -o basic.img
+
+To create a ROM image, you need to calculate the checksum. To do this,
+there is a program addchecksum. It can be compiled with the gcc
+compiler. As a result, the assembly of the ROM image will look
+like this:
+
+  gcc addchecksum.c -o addchecksum
+  nasm -f bin basic.asm -Dbootrom -o basic.rom
+  ./addchecksum basic.rom || rm basic.rom
 
 Tested with VirtualBox for Mac OS X running Windows XP running this
 interpreter, it also works with DosBox and probably with qemu:
 
   qemu-system-x86_64 -fda basic.img
+
+or
+
+  qemu-system-i386  -net none -option-rom basic.rom
+
+for ROM BIOS.
 
 Enjoy it!
 
