@@ -138,16 +138,21 @@
 
         cpu 8086
 
-    %ifndef com_file    ; If not defined create a boot sector
-com_file:       equ 0
-    %endif
-
     %if com_file
         org 0x0100
-    %else
+    %endif
+    %if bootsect
         org 0x7c00
     %endif
-
+    %if bootrom
+        org 0
+        rom_size_multiple_of equ 512
+        bits 16
+        ; PCI Expansion Rom Header
+        ; ------------------------
+        db 0x55, 0xAA ; signature
+        db rom_size/512; initialization size in 512 byte blocks
+    %endif
 vars:       equ 0x7e00  ; Variables (multiple of 256)
 line:       equ 0x7e80  ; Line input
 
@@ -591,9 +596,13 @@ statements:
         ;
         ; Boot sector filler
         ;
-    %if com_file
-    %else
+    %if bootsect
         times 510-($-$$) db 0x4f
         db 0x55,0xaa            ; Make it a bootable sector
     %endif
-
+    %if bootrom
+        db 0 ; reserve at least one byte for checksum
+        rom_end equ $-$$
+        rom_size equ (((rom_end-1)/rom_size_multiple_of)+1)*rom_size_multiple_of
+;       times rom_size - rom_end db 0 ; padding
+    %endif
